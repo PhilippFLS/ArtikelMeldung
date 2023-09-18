@@ -22,9 +22,9 @@ public interface ICrmService
     Task<IEnumerable<Account>> GetAlleKundenFürPartner(Guid partnerAccountId);
 
     /// <summary>
-    /// Funktion zum Ermitteln aller KGRIds, die die angegebene Strecke zugeordnet haben
+    /// Funktion zum Ermitteln aller KundengruppenIds, die die angegebene Preisgruppe zugeordnet haben
     /// </summary>
-    /// <param name="pgrNummer">Die Nummer der Strecke</param>
-    /// <returns>Liste der KGRs</returns>
-    Task<IEnumerable<KundenGr>> GetAlleKGRsFürPgr(int pgrNummer);
+    /// <param name="pgrNummer">Die Nummer der Preisgruppe</param>
+    /// <returns>Liste der Kundengruppen</returns>
+    Task<IEnumerable<KundenGruppe>> GetAlleKundengruppenFürPreisgruppen(int pgrNummer);
 }

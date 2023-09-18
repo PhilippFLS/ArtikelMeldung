@@ -5,6 +5,7 @@ using FLS.CodeBeispiel.CrmService.Models.CrmEntities;
 using FLS.CodeBeispiel.CrmService.Models.Infrastructure;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.Identity.Client;
 
 [assembly: InternalsVisibleTo("FLS.CodeBeispiel.CrmService.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
@@ -55,11 +56,11 @@ internal class CrmService : ICrmService
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Account>> GetAlleKundenFürPartner(Guid gfghAccountId)
+    public async Task<IEnumerable<Account>> GetAlleKundenFürPartner(Guid partnerAccountId)
     {
         var customFilter = new ODataFilter<string>()
         {
-            Key = $"({nameof(Account.Hauptabrechner)} {ODataOperators.eq} {gfghAccountId} or {nameof(Account.Nebenabrechner)} {ODataOperators.eq} {gfghAccountId})",
+            Key = $"({nameof(Account.Hauptabrechner)} {ODataOperators.eq} {partnerAccountId} or {nameof(Account.Nebenabrechner)} {ODataOperators.eq} {partnerAccountId})",
         };
 
         var aktiveKundenFilter = new ODataFilter<int?>()
@@ -75,7 +76,7 @@ internal class CrmService : ICrmService
                                       .WithSelect(nameof(Account.Accountid).ToLower())
                                       .WithSelect(nameof(Account.Accountnumber).ToLower())
                                       .WithSelect(nameof(Account._kgr_id))
-                                      .WithExpand(nameof(Account.K_Gr).ToLower(), new string[] { nameof(KundenGr._regionsArt_1), nameof(KundenGr._regionsArt_2), nameof(KundenGr._pgr_id) })
+                                      .WithExpand(nameof(Account.K_Gr).ToLower(), new string[] { nameof(KundenGruppe._regionsArt_1), nameof(KundenGruppe._regionsArt_2), nameof(KundenGruppe._pgr_id) })
                                       .BuildUri();
 
         var zugeordneteAccounts = await GetHttpResponseAsync<Account>(zugeordneteAccountsUri);
@@ -84,66 +85,67 @@ internal class CrmService : ICrmService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<KundenGr>> GetAlleKGRsFürPgr(int preisgruppenNummer)
+    public async Task<IEnumerable<KundenGruppe>> GetAlleKundengruppenFürPreisgruppen(int preisgruppenNummer)
     {
-        var PgrnGuid = await GetPgrGuid(preisgruppenNummer);
+        var pgrGuid = await GetPreisgruppenGuid(preisgruppenNummer);
 
-        if (PgrnGuid is null)
+        if (pgrGuid is null)
         {
-            return Array.Empty<KundenGr>();
+            logger.LogWarning("Für die Preisgruppe mit der Nummer {preisgruppenNummer} gibt es keinen Eintrag im CRM.", preisgruppenNummer);
+            return Array.Empty<KundenGruppe>();
         }
 
-        return await GetZugeordneteKgrFürPgr((Guid)PgrnGuid);
+        return await GetZugeordneteKundenGruppenFürPreisGruppe((Guid)pgrGuid);
     }
 
     /// <summary>
-    /// Ermittelt für eine Pgrnnummer die ID der Pgr im CRM
+    /// Ermittelt für eine PreisgruppenNummer die ID der Preisgruppe im CRM
     /// </summary>
-    /// <param name="PgrnNummer">Die zugeordnete Preisgruppennummer einer Pgr</param>
-    /// <returns>Die ID der Pgr</returns>
-    private async Task<Guid?> GetPgrGuid(int PgrnNummer)
+    /// <param name="pgrNummer">Die zugeordnete Preisgruppennummer einer Preisgruppe</param>
+    /// <returns>Die ID der Preisgruppe</returns>
+    private async Task<Guid?> GetPreisgruppenGuid(int pgrNummer)
     {
-        var PgrnFilter = new ODataFilter<int?>()
+        var pgrFilter = new ODataFilter<int?>()
         {
-            Key = nameof(PreisGr.Nummer).ToLower(),
-            Value = PgrnNummer
+            Key = nameof(PreisGruppe.Nummer).ToLower(),
+            Value = pgrNummer
         };
 
-        var PgrnUri = new UriBuilder(httpClient.BaseAddress!.ToString())
+        var pgrUri = new UriBuilder(httpClient.BaseAddress!.ToString())
                                 .SetBaseEntity(CrmTableNames.PreisGr)
-                                .WithFilter(PgrnFilter)
-                                .WithSelect(nameof(PreisGr.Id).ToLower())
+                                .WithFilter(pgrFilter)
+                                .WithSelect(nameof(PreisGruppe.Id).ToLower())
                                 .BuildUri();
 
-        var Pgr = await GetHttpResponseAsync<PreisGr>(PgrnUri);
+        var pgr = await GetHttpResponseAsync<PreisGruppe>(pgrUri);
 
-        return Pgr != null && Pgr.Value.Any() ? Pgr.Value[0].Id : null;
+        return pgr != null && pgr.Value.Any() ? pgr.Value[0].Id : null;
     }
 
     /// <summary>
-    /// Ermittelt für eine angegebene Pgr alle KGRs, die die Pgr gesetzt haben
+    /// Ermittelt für eine angegebene Preisgruppen alle Kundengruppen, die die Preisgruppe gesetzt haben
     /// </summary>
-    /// <param name="PgrnGuid">Die CRM-ID der Pgr</param>
-    /// <returns>Liste von allen KGRs, die der Pgr zugeordnet sind</returns>
-    private async Task<IEnumerable<KundenGr>> GetZugeordneteKgrFürPgr(Guid PgrnGuid)
+    /// <param name="pgrGuid">Die CRM-ID der Preisgruppe</param>
+    /// <returns>Liste von allen Kundengruppen, die der Preisgruppe zugeordnet sind</returns>
+    private async Task<IEnumerable<KundenGruppe>> GetZugeordneteKundenGruppenFürPreisGruppe(Guid pgrGuid)
     {
         var kgrFilter = new ODataFilter<Guid>()
         {
-            Key = nameof(KundenGr._pgr_id),
-            Value = PgrnGuid
+            Key = nameof(KundenGruppe._pgr_id),
+            Value = pgrGuid
         };
 
         var kgrUri = new UriBuilder(httpClient.BaseAddress!.ToString())
                                 .SetBaseEntity(CrmTableNames.KundenGr)
                                 .WithFilter(kgrFilter)
-                                .WithSelect(nameof(KundenGr.ID).ToLower())
-                                .WithSelect(nameof(KundenGr._regionsArt_1))
-                                .WithSelect(nameof(KundenGr._regionsArt_2))
+                                .WithSelect(nameof(KundenGruppe.ID).ToLower())
+                                .WithSelect(nameof(KundenGruppe._regionsArt_1))
+                                .WithSelect(nameof(KundenGruppe._regionsArt_2))
                                 .BuildUri();
 
-        var kgrs = await GetHttpResponseAsync<KundenGr>(kgrUri);
+        var kgrs = await GetHttpResponseAsync<KundenGruppe>(kgrUri);
 
-        return kgrs?.Value ?? Array.Empty<KundenGr>();
+        return kgrs?.Value ?? Array.Empty<KundenGruppe>();
     }
 
     /// <summary>

@@ -6,5 +6,5 @@ public record Katalog
 
     public int PreisGrNr { get; init; }
 
-    public List<Kgr> Kgrs { get; set; } = new List<Kgr>();
+    public List<KundenGruppe> Kgrs { get; set; } = new List<KundenGruppe>();
 }
