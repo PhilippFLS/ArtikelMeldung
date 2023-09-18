@@ -1,10 +1,10 @@
 ﻿namespace FLS.CodeBeispiel.FunctionApp.Mapper;
 
-public static class KgrMapper
+public static class KundenGruppenMapper
 {
-    public static Models.Domain.Kgr MapToDomainKgr(this CrmService.Models.CrmEntities.KundenGr crmKgr)
+    public static Models.Domain.KundenGruppe MapToDomainKgr(this CrmService.Models.CrmEntities.KundenGruppe crmKgr)
     {
-        return new Models.Domain.Kgr()
+        return new Models.Domain.KundenGruppe()
         {
             KgrId = crmKgr.ID,
             RegionsArt_1 = crmKgr._regionsArt_1,

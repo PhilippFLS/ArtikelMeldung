@@ -7,7 +7,7 @@ using FLS.CodeBeispiel.FunctionApp.Models.MailTemplates;
 namespace FLS.CodeBeispiel.FunctionApp.Logic;
 
 /// <summary>
-/// Beinhaltet Geschäftslogik für die Meldung von GFGH-Artikelnummern
+/// Beinhaltet Geschäftslogik für die Meldung von externen Artikelnummern
 /// </summary>
 public class ArtikelMeldungsBearbeiter
 {

@@ -117,7 +117,7 @@ public class ErgänzungsAntragMailTest
             }
         };
 
-        var PreisgruppenPzos1 = new List<CrmService.Models.CrmEntities.KundenGr>()
+        var PreisgruppenPzos1 = new List<CrmService.Models.CrmEntities.KundenGruppe>()
         {
             new()
             {
@@ -133,7 +133,7 @@ public class ErgänzungsAntragMailTest
             }
         };
 
-        var PreisgruppenPzos2 = new List<CrmService.Models.CrmEntities.KundenGr>()
+        var PreisgruppenPzos2 = new List<CrmService.Models.CrmEntities.KundenGruppe>()
         {
             new()
             {
@@ -162,12 +162,12 @@ public class ErgänzungsAntragMailTest
                 .Returns(Task.FromResult(crmAccounts as IEnumerable<CrmService.Models.CrmEntities.Account>));
 
         Mocker.GetMock<ICrmService>()
-                .Setup(x => x.GetAlleKGRsFürPgr(It.Is<int>(y => y == 1)))
-                .Returns(Task.FromResult(PreisgruppenPzos1 as IEnumerable<CrmService.Models.CrmEntities.KundenGr>));
+                .Setup(x => x.GetAlleKundengruppenFürPreisgruppen(It.Is<int>(y => y == 1)))
+                .Returns(Task.FromResult(PreisgruppenPzos1 as IEnumerable<CrmService.Models.CrmEntities.KundenGruppe>));
 
         Mocker.GetMock<ICrmService>()
-                .Setup(x => x.GetAlleKGRsFürPgr(It.Is<int>(y => y == 2)))
-                .Returns(Task.FromResult(PreisgruppenPzos2 as IEnumerable<CrmService.Models.CrmEntities.KundenGr>));
+                .Setup(x => x.GetAlleKundengruppenFürPreisgruppen(It.Is<int>(y => y == 2)))
+                .Returns(Task.FromResult(PreisgruppenPzos2 as IEnumerable<CrmService.Models.CrmEntities.KundenGruppe>));
 
         Mocker.GetMock<IKatalogService>()
                 .Setup(x => x.GetRegionFürKundeInEinerRegionsart(It.Is<Guid>(y => y == crmAccounts[0].Accountid), It.Is<Guid>(y => y == PreisgruppenPzos1[0]._regionsArt_1)))

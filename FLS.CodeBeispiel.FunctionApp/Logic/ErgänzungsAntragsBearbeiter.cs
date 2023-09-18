@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 namespace FLS.CodeBeispiel.FunctionApp.Logic;
 
 /// <summary>
-/// Implementiert Geschäftslogik zu Sortimentsergänzungsanträge
+/// Implementiert Geschäftslogik zu Ergänzungsanträge
 /// </summary>
 public class ErgänzungsAntragsBearbeiter
 {
@@ -74,11 +74,11 @@ public class ErgänzungsAntragsBearbeiter
 
         foreach (var strecke in kataloge)
         {
-            var Preisgruppen = await crmService.GetAlleKGRsFürPgr(strecke.PreisGrNr);
-            var domainPreisgruppen = Preisgruppen.Select(KgrMapper.MapToDomainKgr);
+            var preisgruppen = await crmService.GetAlleKundengruppenFürPreisgruppen(strecke.PreisGrNr);
+            var domainPreisgruppen = preisgruppen.Select(KundenGruppenMapper.MapToDomainKgr);
             strecke.Kgrs.AddRange(domainPreisgruppen);
 
-            preisgruppenDerKataloge.AddRange(Preisgruppen.Select(p => p.ID));
+            preisgruppenDerKataloge.AddRange(preisgruppen.Select(p => p.ID));
         }
 
         var betroffeneKunden = crmKundenDesPartner
@@ -119,7 +119,7 @@ public class ErgänzungsAntragsBearbeiter
     /// </summary>
     /// <param name="kundenGruppen">Liste der Kundengruppen, die einem Katalog zugeordnet sind</param>
     /// <param name="account">Der Account des Kunden</param>
-    private async Task ErmittleRegion2(IEnumerable<Kgr> kundenGruppen, Account account)
+    private async Task ErmittleRegion2(IEnumerable<KundenGruppe> kundenGruppen, Account account)
     {
         var regionsArt_2 = kundenGruppen.Where(kgr => kgr.KgrId == account.KgrId)
                                .Where(kgr => kgr.RegionsArt_2 is not null)
@@ -152,7 +152,7 @@ public class ErgänzungsAntragsBearbeiter
     /// </summary>
     /// <param name="kundenGruppen">Liste der Kundengruppen, die einem Katalog zugeordnet sind</param>
     /// <param name="account">Der Account des Kunden</param>
-    private async Task ErmittleRegion1(IEnumerable<Kgr> kundenGruppen, Account account)
+    private async Task ErmittleRegion1(IEnumerable<KundenGruppe> kundenGruppen, Account account)
     {
         var regionsArt_1 = kundenGruppen.Where(kgr => kgr.KgrId == account.KgrId)
                                .Where(kgr => kgr.RegionsArt_1 is not null)

@@ -1,9 +1,9 @@
 ﻿namespace FLS.CodeBeispiel.CrmService.Models.CrmEntities;
 
 /// <summary>
-/// Preisgruppe im CRM - gleichbedeutend mit einer Strecke/ einem Ordersatz
+/// Preisgruppe im CRM - gleichbedeutend mit einem Katalog
 /// </summary>
-public record PreisGr
+public record PreisGruppe
 {
     public string Bezeichnung { get; set; } = string.Empty;
 

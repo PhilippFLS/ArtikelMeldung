@@ -8,14 +8,14 @@ using System.Net;
 
 namespace FLS.CodeBeispiel.CrmService.Tests;
 
-public class KgrsFürPgrsErmitteln
+public class KundenGruppenFürPreisGruppenErmitteln
 {
     private readonly Mock<ILogger<Infrastructure.CrmService>> _logger = new();
     private readonly Mock<HttpMessageHandler> _handler = new();
     private readonly HttpClient _httpClient = new();
     private Infrastructure.CrmService _crmService { get; set; }
 
-    public KgrsFürPgrsErmitteln()
+    public KundenGruppenFürPreisGruppenErmitteln()
     {
         _httpClient = new HttpClient(_handler.Object)
         {
@@ -25,7 +25,7 @@ public class KgrsFürPgrsErmitteln
     }
 
     [Fact]
-    public async Task FürEinePgrWerdenDieKgrsKorrektErmittelt()
+    public async Task FürEinePreisGruppenWerdenDieKundenGruppenKorrektErmittelt()
     {
         var preisgruppenNummer = 123;
         var pgrGuid = Guid.NewGuid();
@@ -33,11 +33,11 @@ public class KgrsFürPgrsErmitteln
         var expectedPgrGuidResponse = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
-            Content = JsonContent.Create(new CrmBaseResponse<PreisGr>()
+            Content = JsonContent.Create(new CrmBaseResponse<PreisGruppe>()
             {
-                Value = new PreisGr[]
+                Value = new PreisGruppe[]
                 {
-                    new PreisGr()
+                    new PreisGruppe()
                     {
                         Id = pgrGuid
                     }
@@ -48,18 +48,18 @@ public class KgrsFürPgrsErmitteln
         var expectedKgrResponse = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
-            Content = JsonContent.Create(new CrmBaseResponse<KundenGr>()
+            Content = JsonContent.Create(new CrmBaseResponse<KundenGruppe>()
             {
-                Value = new KundenGr[]
+                Value = new KundenGruppe[]
                 {
-                    new KundenGr()
+                    new KundenGruppe()
                     {
                         _pgr_id = pgrGuid,
                         _ag_kgrid_value = Guid.NewGuid(),
                         _regionsArt_1 = Guid.NewGuid(),
                         _regionsArt_2 = null,
                     },
-                     new KundenGr()
+                     new KundenGruppe()
                     {
                         _pgr_id = pgrGuid,
                         _ag_kgrid_value = Guid.NewGuid(),
@@ -84,13 +84,13 @@ public class KgrsFürPgrsErmitteln
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(x => x.RequestUri == expectedKgrUri), ItExpr.IsAny<CancellationToken>())
             .Returns(Task.FromResult(expectedKgrResponse));
 
-        var result = await _crmService.GetAlleKGRsFürPgr(preisgruppenNummer);
+        var result = await _crmService.GetAlleKundengruppenFürPreisgruppen(preisgruppenNummer);
 
         Assert.Equal(2, result.Count());
     }
 
     [Fact]
-    public async Task FürEinePgrOhneKgrsWirdEineLeereListeZurückgegeben()
+    public async Task FürEinePreisGruppeOhneKundenGruppenWirdEineLeereListeZurückgegeben()
     {
         var pgrNummer = 123;
         var pgrGuid = Guid.NewGuid();
@@ -98,11 +98,11 @@ public class KgrsFürPgrsErmitteln
         var expectedPgrGuidResponse = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
-            Content = JsonContent.Create(new CrmBaseResponse<PreisGr>()
+            Content = JsonContent.Create(new CrmBaseResponse<PreisGruppe>()
             {
-                Value = new PreisGr[]
+                Value = new PreisGruppe[]
                 {
-                    new PreisGr()
+                    new PreisGruppe()
                     {
                         Id = pgrGuid
                     }
@@ -113,9 +113,9 @@ public class KgrsFürPgrsErmitteln
         var expectedKgrResponse = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
-            Content = JsonContent.Create(new CrmBaseResponse<KundenGr>()
+            Content = JsonContent.Create(new CrmBaseResponse<KundenGruppe>()
             {
-                Value = Array.Empty<KundenGr>(),
+                Value = Array.Empty<KundenGruppe>(),
             })
         };
 
@@ -133,22 +133,22 @@ public class KgrsFürPgrsErmitteln
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(x => x.RequestUri == expectedKgrUri), ItExpr.IsAny<CancellationToken>())
             .Returns(Task.FromResult(expectedKgrResponse));
 
-        var result = await _crmService.GetAlleKGRsFürPgr(pgrNummer);
+        var result = await _crmService.GetAlleKundengruppenFürPreisgruppen(pgrNummer);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task FürEineStreckeOhneGuidWirdEineLeereListeZurückgegeben()
+    public async Task FürEinePreisGruppeOhneGuidWirdEineLeereListeZurückgegeben()
     {
         var pgrNummer = 123;
 
         var expectedResponse = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
-            Content = JsonContent.Create(new CrmBaseResponse<PreisGr>()
+            Content = JsonContent.Create(new CrmBaseResponse<PreisGruppe>()
             {
-                Value = Array.Empty<PreisGr>()
+                Value = Array.Empty<PreisGruppe>()
             })
         };
 
@@ -159,7 +159,7 @@ public class KgrsFürPgrsErmitteln
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(x => x.RequestUri == expectedUri), ItExpr.IsAny<CancellationToken>())
             .Returns(Task.FromResult(expectedResponse));
 
-        var result = await _crmService.GetAlleKGRsFürPgr(pgrNummer);
+        var result = await _crmService.GetAlleKundengruppenFürPreisgruppen(pgrNummer);
 
         Assert.Empty(result);
     }
